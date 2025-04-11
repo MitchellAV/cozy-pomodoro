@@ -2,16 +2,15 @@ import useTimer, { formatTime } from '../hooks/useTimer';
 
 import buzzerSound from '../assets/audio/buzzer.wav';
 
-const POMODORO_TIME_LENGTH = 25 * 60; // 25 minutes
-const BREAK_TIME_LENGTH = 5 * 60; // 5 minutes
+interface Props {
+	timerDuration: number;
+}
 
-const TEST_TIME_LENGTH = 10; // 10 seconds
-
-const Timer = () => {
-	const audio = new Audio(buzzerSound);
-
+const Timer = ({ timerDuration }: Props) => {
 	const { secondsTime, startTimer, pauseTimer, resetTimer } =
-		useTimer(TEST_TIME_LENGTH);
+		useTimer(timerDuration);
+
+	const audio = new Audio(buzzerSound);
 
 	const playAudio = () => {
 		audio.play().catch((error) => {

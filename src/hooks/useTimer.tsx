@@ -43,6 +43,11 @@ const useTimer = (startTimeSeconds: number) => {
 		}
 	}, [secondsTime]);
 
+	useEffect(() => {
+		setSecondsTime(startTimeSeconds);
+		setIsRunning(false);
+	}, [startTimeSeconds]);
+
 	const startTimer = () => {
 		if (!isRunning) {
 			setIsRunning(true);
