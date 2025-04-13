@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import Timer from './components/Timer';
 
@@ -7,11 +7,10 @@ const BREAK_TIME_LENGTH = 5 * 60; // 5 minutes
 const TEST_TIME_LENGTH = 10; // 10 seconds
 
 const App: React.FC = () => {
-	const [isFinished, setIsFinished] = React.useState(false);
+	const [isFinished, setIsFinished] = useState(false);
 
-	const [pomodoroState, setPomodoroState] = React.useState('pomodoro');
-	const [timerDuration, setTimerDuration] =
-		React.useState(POMODORO_TIME_LENGTH);
+	const [pomodoroState, setPomodoroState] = useState('pomodoro');
+	const [timerDuration, setTimerDuration] = useState(POMODORO_TIME_LENGTH);
 
 	console.log(timerDuration);
 
