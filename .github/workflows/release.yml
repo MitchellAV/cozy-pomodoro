@@ -1,0 +1,29 @@
+# .github/workflows/release.yml
+permissions:
+    contents: write
+
+name: Release app
+on:
+    workflow_dispatch:
+jobs:
+    build:
+        strategy:
+            matrix:
+                os:
+                    [
+                        { name: 'linux', image: 'ubuntu-latest' },
+                        { name: 'windows', image: 'windows-latest' },
+                        { name: 'macos-intel', image: 'macos-13' },
+                        { name: 'macos-arm64', image: 'macos-latest' },
+                    ]
+        runs-on: ${{ matrix.os.image }}
+        steps:
+            - name: Github checkout
+              uses: actions/checkout@v4
+            - name: Use Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+            - run: npm ci
+            - name: Publish app
+              run: npm run publish
