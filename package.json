@@ -1,6 +1,6 @@
 {
   "name": "cozy-pomodoro",
-  "productName": "Cozy Pomodoro",
+  "productName": "cozy-pomodoro",
   "version": "1.0.0",
   "description": "A cozy pomodoro timer",
   "main": ".webpack/main",
