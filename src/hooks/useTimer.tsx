@@ -21,38 +21,6 @@ const useTimer = (startTimeSeconds: number) => {
 	const [isRunning, setIsRunning] = useState<boolean>(false);
 	const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
 
-	useEffect(() => {
-		if (isRunning && secondsTime > 0) {
-			const id = setInterval(() => {
-				setSecondsTime((prev) => {
-					return prev - 1;
-				});
-			}, 1000);
-			setIntervalId(id);
-		} else {
-			clearInterval(intervalId);
-		}
-		return () => {
-			clearInterval(intervalId);
-		};
-	}, [isRunning]);
-
-	useEffect(() => {
-		if (secondsTime <= 0) {
-			setIsRunning(false);
-			setIsFinished(true);
-			setSecondsTime(0);
-			clearInterval(intervalId);
-		}
-	}, [secondsTime]);
-
-	useEffect(() => {
-		setSecondsTime(startTimeSeconds);
-		setIsRunning(false);
-		setIsFinished(false);
-		clearInterval(intervalId);
-	}, [startTimeSeconds]);
-
 	const startTimer = () => {
 		if (!isRunning && secondsTime > 0 && !isFinished) {
 			setIsRunning(true);
@@ -71,6 +39,40 @@ const useTimer = (startTimeSeconds: number) => {
 		setSecondsTime(startTimeSeconds);
 		clearInterval(intervalId);
 	};
+
+	useEffect(() => {
+		setSecondsTime(startTimeSeconds);
+		setIsRunning(false);
+		setIsFinished(false);
+	}, [startTimeSeconds]);
+
+	useEffect(() => {
+		if (secondsTime <= 0) {
+			setIsRunning(false);
+			setIsFinished(true);
+			clearInterval(intervalId);
+			setIntervalId(null);
+		}
+	}, [secondsTime, intervalId]);
+
+	useEffect(() => {
+		if (isRunning && !isFinished) {
+			if (!intervalId) {
+				const id = setInterval(() => {
+					setSecondsTime((prev) => {
+						return prev - 1;
+					});
+				}, 10);
+				setIntervalId(id);
+			}
+		} else if (!isRunning && intervalId) {
+			clearInterval(intervalId);
+			setIntervalId(null);
+		}
+		return () => {
+			clearInterval(intervalId);
+		};
+	}, [isRunning, intervalId, isFinished]);
 
 	return {
 		secondsTime,

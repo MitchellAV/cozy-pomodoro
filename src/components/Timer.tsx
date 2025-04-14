@@ -1,9 +1,14 @@
-import useTimer, { formatTime } from '../hooks/useTimer';
+import { useEffect } from 'react';
+import { formatTime } from '../hooks/useTimer';
 
 import buzzerSound from '../assets/audio/buzzer.wav';
 
 interface Props {
-	timerDuration: number;
+	secondsTime: number;
+	isFinished: boolean;
+	startTimer: () => void;
+	pauseTimer: () => void;
+	resetTimer: () => void;
 }
 
 const audio = new Audio(buzzerSound);
@@ -14,13 +19,19 @@ const playAudio = () => {
 	});
 };
 
-const Timer = ({ timerDuration }: Props) => {
-	const { secondsTime, isFinished, startTimer, pauseTimer, resetTimer } =
-		useTimer(timerDuration);
-
-	if (secondsTime <= 0 && !isFinished) {
-		playAudio();
-	}
+const Timer = ({
+	isFinished,
+	pauseTimer,
+	resetTimer,
+	secondsTime,
+	startTimer,
+}: Props) => {
+	useEffect(() => {
+		if (isFinished && secondsTime <= 0) {
+			console.log('Timer finished!');
+			playAudio();
+		}
+	}, [isFinished, secondsTime]);
 
 	return (
 		<div className="timer-container">
