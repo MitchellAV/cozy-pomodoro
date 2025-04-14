@@ -16,6 +16,7 @@ const useTimer = (startTimeSeconds: number) => {
 	}
 
 	const [secondsTime, setSecondsTime] = useState<number>(startTimeSeconds);
+	const [isFinished, setIsFinished] = useState<boolean>(false);
 
 	const [isRunning, setIsRunning] = useState<boolean>(false);
 	const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
@@ -38,18 +39,22 @@ const useTimer = (startTimeSeconds: number) => {
 
 	useEffect(() => {
 		if (secondsTime <= 0) {
-			intervalId && clearInterval(intervalId);
 			setIsRunning(false);
+			setIsFinished(true);
+			setSecondsTime(0);
+			clearInterval(intervalId);
 		}
 	}, [secondsTime]);
 
 	useEffect(() => {
 		setSecondsTime(startTimeSeconds);
 		setIsRunning(false);
+		setIsFinished(false);
+		clearInterval(intervalId);
 	}, [startTimeSeconds]);
 
 	const startTimer = () => {
-		if (!isRunning) {
+		if (!isRunning && secondsTime > 0 && !isFinished) {
 			setIsRunning(true);
 		}
 	};
@@ -62,11 +67,15 @@ const useTimer = (startTimeSeconds: number) => {
 
 	const resetTimer = () => {
 		setIsRunning(false);
+		setIsFinished(false);
 		setSecondsTime(startTimeSeconds);
+		clearInterval(intervalId);
 	};
 
 	return {
 		secondsTime,
+		isFinished,
+		isRunning,
 		startTimer,
 		pauseTimer,
 		resetTimer,

@@ -21,7 +21,7 @@ const createWindow = (): void => {
 		alwaysOnTop: true,
 		autoHideMenuBar: true,
 		center: true,
-		// resizable: false,
+		resizable: false,
 		fullscreenable: false,
 		webPreferences: {
 			preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
@@ -32,7 +32,9 @@ const createWindow = (): void => {
 	mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
 	// Open the DevTools.
-	mainWindow.webContents.openDevTools();
+	if (process.env.NODE_ENV === 'development') {
+		mainWindow.webContents.openDevTools({ mode: 'detach' });
+	}
 };
 
 // This method will be called when Electron has finished
