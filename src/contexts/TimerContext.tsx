@@ -10,24 +10,18 @@ interface TimerContextType {
 	startTimeDuration: number;
 	setStartTimeDuration: React.Dispatch<React.SetStateAction<number>>;
 	numberOfSessions: number;
-	setNumberOfSessions: React.Dispatch<React.SetStateAction<number>>;
 	currentState: TimerState;
 	setCurrentState: React.Dispatch<React.SetStateAction<TimerState>>;
 	isStudyFinished: boolean;
 	setIsStudyFinished: React.Dispatch<React.SetStateAction<boolean>>;
 	isRunning: boolean;
 	setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
-	timerLengthMap: {
-		[TimerState.WORK]: number;
-		[TimerState.BREAK]: number;
-		[TimerState.STANDBY]: number;
-	};
 }
 
 const POMODORO_TIME_LENGTH = 25 * 60; // 25 minutes
 const BREAK_TIME_LENGTH = 5 * 60; // 5 minutes
 
-const timerLengthMap = {
+export const timerLengthMap = {
 	[TimerState.WORK]: POMODORO_TIME_LENGTH,
 	[TimerState.BREAK]: BREAK_TIME_LENGTH,
 	[TimerState.STANDBY]: 0,
@@ -40,19 +34,17 @@ const DEFAULT_CONTEXT: TimerContextType = {
 	startTimeDuration: DEFAULT_DURATION,
 	setStartTimeDuration: () => null,
 	numberOfSessions: 0,
-	setNumberOfSessions: () => null,
 	currentState: DEFAULT_STATE,
 	setCurrentState: () => null,
-	isStudyFinished: false,
+	isStudyFinished: true,
 	setIsStudyFinished: () => null,
 	isRunning: false,
 	setIsRunning: () => null,
-	timerLengthMap: timerLengthMap,
 };
 
-const calculateSessionCount = (startTimeDuration: number) => {
+const calculateSessionCount = (duration: number) => {
 	return Math.floor(
-		startTimeDuration /
+		duration /
 			(timerLengthMap[TimerState.WORK] + timerLengthMap[TimerState.BREAK])
 	);
 };
@@ -65,36 +57,36 @@ const TimerProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [startTimeDuration, setStartTimeDuration] =
 		useState<number>(DEFAULT_DURATION);
 
-	const [currentState, setCurrentState] = useState<TimerState>(DEFAULT_STATE);
-
 	const [numberOfSessions, setNumberOfSessions] = useState<number>(
-		calculateSessionCount(startTimeDuration)
+		calculateSessionCount(DEFAULT_DURATION)
 	);
+	const [currentState, setCurrentState] = useState<TimerState>(DEFAULT_STATE);
 
 	const [isStudyFinished, setIsStudyFinished] = useState<boolean>(false);
 	const [isRunning, setIsRunning] = useState<boolean>(false);
 
 	useEffect(() => {
-		const sessionCount = calculateSessionCount(startTimeDuration);
-		setNumberOfSessions(sessionCount);
+		setNumberOfSessions(calculateSessionCount(startTimeDuration));
 	}, [startTimeDuration]);
 
-	console.log('TimerProvider');
-
+	useEffect(() => {
+		if (isStudyFinished) {
+			setIsRunning(false);
+			setCurrentState(TimerState.STANDBY);
+		}
+	}, [isStudyFinished]);
 	return (
 		<TimerContext.Provider
 			value={{
 				startTimeDuration,
 				setStartTimeDuration,
 				numberOfSessions,
-				setNumberOfSessions,
 				currentState,
 				setCurrentState,
 				isStudyFinished,
 				setIsStudyFinished,
 				isRunning,
 				setIsRunning,
-				timerLengthMap,
 			}}
 		>
 			{children}

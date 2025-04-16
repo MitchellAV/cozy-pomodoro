@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from 'react';
-import { TimerContext } from '../contexts/TimerContext';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { TimerContext, timerLengthMap } from '../contexts/TimerContext';
 
 import Timer from './Timer';
 import useTimer from '../hooks/useTimer';
@@ -14,77 +14,68 @@ const PomodoroTimer = () => {
 	const {
 		startTimeDuration,
 		numberOfSessions,
-		setNumberOfSessions,
-		timerLengthMap,
-		currentState,
 		setCurrentState,
-		isRunning: isRunningContext,
-		setIsRunning: setIsRunningContext,
-		isStudyFinished,
 		setIsStudyFinished,
-	} = useContext(TimerContext);
-
-	console.log('PomodoroTimer', {
-		startTimeDuration,
-		numberOfSessions,
 		currentState,
-	});
+		isStudyFinished,
+		setIsRunning: setIsRunningContext,
+	} = useContext(TimerContext);
 
 	const [remainingSessions, setRemainingSessions] =
 		useState<number>(numberOfSessions);
 
-	const duration = timerLengthMap[currentState];
-
-	const [currentDuration, setCurrentDuration] = useState<number>(duration);
-
-	console.log('currentDuration', currentDuration);
-
 	const {
+		secondsTime,
 		isFinished,
-		isRunning,
 		pauseTimer,
 		resetTimer,
-		secondsTime,
+		restartTimer,
 		startTimer,
-	} = useTimer(currentDuration);
+	} = useTimer(timerLengthMap[currentState]);
+
+	const restartTimerCallback = useCallback(
+		(newState: TimerState) => {
+			if (newState === TimerState.WORK) {
+				setRemainingSessions((prev) => prev - 1);
+			}
+			setCurrentState(newState);
+			restartTimer(timerLengthMap[newState]);
+		},
+		[restartTimer, setCurrentState]
+	);
 
 	useEffect(() => {
 		setRemainingSessions(numberOfSessions);
-		setCurrentDuration(duration);
-	}, [numberOfSessions, duration]);
+		setIsStudyFinished(false);
+		resetTimer();
+	}, [startTimeDuration, numberOfSessions, resetTimer, setIsStudyFinished]);
 
 	useEffect(() => {
-		switch (currentState) {
-			case TimerState.WORK:
-				if (isFinished) {
-					setCurrentState(TimerState.BREAK);
-				}
-				break;
-			case TimerState.BREAK:
-				if (isFinished) {
+		if (isFinished && !isStudyFinished) {
+			switch (currentState) {
+				case TimerState.WORK:
+					restartTimerCallback(TimerState.BREAK);
+					break;
+				case TimerState.BREAK:
 					if (remainingSessions > 1) {
-						setCurrentState(TimerState.BREAK);
-						setRemainingSessions((prev) => prev - 1);
+						restartTimerCallback(TimerState.WORK);
 					} else {
 						setIsStudyFinished(true);
-						setIsRunningContext(false);
 						setCurrentState(TimerState.STANDBY);
 						setRemainingSessions(0);
+						break;
 					}
-				}
-				break;
-			case TimerState.STANDBY:
-				break;
-			default:
-				break;
+			}
 		}
 	}, [
-		currentState,
 		isFinished,
+		currentState,
+		restartTimerCallback,
+		setIsStudyFinished,
 		remainingSessions,
 		setCurrentState,
 		setIsRunningContext,
-		setIsStudyFinished,
+		isStudyFinished,
 	]);
 
 	return (

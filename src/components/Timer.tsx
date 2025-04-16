@@ -14,6 +14,8 @@ interface Props {
 const audio = new Audio(buzzerSound);
 
 const playAudio = () => {
+	audio.currentTime = 0; // Reset audio to start
+
 	audio.play().catch((error) => {
 		console.error('Error playing audio:', error);
 	});
@@ -28,7 +30,6 @@ const Timer = ({
 }: Props) => {
 	useEffect(() => {
 		if (isFinished && secondsTime <= 0) {
-			console.log('Timer finished!');
 			playAudio();
 		}
 	}, [isFinished, secondsTime]);

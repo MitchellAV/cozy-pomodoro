@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
 import { TimerContext } from '../contexts/TimerContext';
 
-const DEFAULT_DURATION = 30; // in minutes
-const MIN_DURATION = 30; // in minutes
-const STEP_DURATION = 30; // in minutes
+const DEFAULT_DURATION = 1; // in hours
+const MIN_DURATION = 0.5; // in hours
+const STEP_DURATION = 0.5; // in hours
 
 enum TimerState {
 	WORK = 'WORK',
@@ -12,18 +12,23 @@ enum TimerState {
 }
 
 const MainForm = () => {
-	const { setStartTimeDuration, setIsRunning, setCurrentState } =
-		useContext(TimerContext);
+	const {
+		setStartTimeDuration,
+		setIsStudyFinished,
+		setIsRunning,
+		setCurrentState,
+	} = useContext(TimerContext);
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		const form = e.currentTarget;
 		const formData = new FormData(form);
 		const duration = formData.get('duration') as string;
-		const durationInMinutes = parseInt(duration, 10);
-		const durationInSeconds = durationInMinutes * 60;
+		const durationInHours = parseFloat(duration);
+		const durationInSeconds = durationInHours * 60 * 60;
 		setStartTimeDuration(durationInSeconds);
 		setCurrentState(TimerState.WORK);
+		setIsStudyFinished(false);
 		setIsRunning(true);
 	};
 
