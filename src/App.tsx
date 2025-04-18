@@ -1,19 +1,16 @@
-import React, { useState } from 'react';
-
-import Timer from './components/Timer';
-
-const POMODORO_TIME_LENGTH = 25 * 60; // 25 minutes
-const BREAK_TIME_LENGTH = 5 * 60; // 5 minutes
-const TEST_TIME_LENGTH = 10; // 10 seconds
+import React from 'react';
+import MainForm from './components/MainForm';
+import { TimerProvider } from './contexts/TimerContext';
+import PomodoroTimer from './components/PomodoroTimer';
 
 const App: React.FC = () => {
-	const [timerDuration, setTimerDuration] = useState(TEST_TIME_LENGTH);
-
 	return (
 		<div className="app-container">
 			<h1 className="app-title">Cozy Pomodoro App</h1>
-
-			<Timer timerDuration={timerDuration} />
+			<TimerProvider>
+				<MainForm />
+				<PomodoroTimer />
+			</TimerProvider>
 		</div>
 	);
 };

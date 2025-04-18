@@ -1,76 +1,73 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
 export const formatTime = (seconds: number) => {
-	const hours = Math.floor(seconds / 3600);
 	const minutes = Math.floor((seconds % 3600) / 60);
 	const secs = seconds % 60;
-	return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
+	return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(
 		2,
 		'0'
-	)}:${String(secs).padStart(2, '0')}`;
+	)}`;
 };
 
 const useTimer = (startTimeSeconds: number) => {
-	if (startTimeSeconds <= 0) {
-		throw new Error('startTimeSeconds must be greater than 0');
-	}
-
 	const [secondsTime, setSecondsTime] = useState<number>(startTimeSeconds);
 	const [isFinished, setIsFinished] = useState<boolean>(false);
-
 	const [isRunning, setIsRunning] = useState<boolean>(false);
-	const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
+	const intervalId = useRef<NodeJS.Timeout | null>(null);
 
-	useEffect(() => {
-		if (isRunning && secondsTime > 0) {
-			const id = setInterval(() => {
-				setSecondsTime((prev) => {
-					return prev - 1;
-				});
-			}, 1000);
-			setIntervalId(id);
-		} else {
-			clearInterval(intervalId);
+	const startTimer = useCallback(() => {
+		if (!isRunning && !isFinished) {
+			setIsFinished(false);
+			setIsRunning(true);
 		}
-		return () => {
-			clearInterval(intervalId);
-		};
+	}, [isRunning, isFinished]);
+
+	const pauseTimer = useCallback(() => {
+		if (isRunning) {
+			setIsRunning(false);
+		}
 	}, [isRunning]);
+
+	const resetTimer = useCallback(() => {
+		setSecondsTime(startTimeSeconds);
+		setIsFinished(false);
+		setIsRunning(false);
+		clearInterval(intervalId.current);
+		intervalId.current = null;
+	}, [startTimeSeconds]);
+
+	const restartTimer = useCallback((newStartTimeSeconds: number) => {
+		setSecondsTime(newStartTimeSeconds);
+		setIsFinished(false);
+		setIsRunning(true);
+	}, []);
 
 	useEffect(() => {
 		if (secondsTime <= 0) {
 			setIsRunning(false);
 			setIsFinished(true);
-			setSecondsTime(0);
-			clearInterval(intervalId);
 		}
 	}, [secondsTime]);
 
 	useEffect(() => {
-		setSecondsTime(startTimeSeconds);
-		setIsRunning(false);
-		setIsFinished(false);
-		clearInterval(intervalId);
-	}, [startTimeSeconds]);
-
-	const startTimer = () => {
-		if (!isRunning && secondsTime > 0 && !isFinished) {
-			setIsRunning(true);
-		}
-	};
-
-	const pauseTimer = () => {
 		if (isRunning) {
-			setIsRunning(false);
+			if (!intervalId.current) {
+				const id = setInterval(() => {
+					setSecondsTime((prev) => {
+						return prev - 1;
+					});
+				}, 10);
+				intervalId.current = id;
+			}
+		} else {
+			clearInterval(intervalId.current);
+			intervalId.current = null;
 		}
-	};
-
-	const resetTimer = () => {
-		setIsRunning(false);
-		setIsFinished(false);
-		setSecondsTime(startTimeSeconds);
-		clearInterval(intervalId);
-	};
+		return () => {
+			clearInterval(intervalId.current);
+			intervalId.current = null;
+		};
+	}, [isRunning]);
 
 	return {
 		secondsTime,
@@ -79,6 +76,7 @@ const useTimer = (startTimeSeconds: number) => {
 		startTimer,
 		pauseTimer,
 		resetTimer,
+		restartTimer,
 	};
 };
 
